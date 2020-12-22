@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A5A47905-1FD1-475A-819D-0BFDF4DABE5D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PrioritiesManager</RootNamespace>
+    <AssemblyName>PrioritiesManager</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="packages.config" />
+    <Reference Include="0Harmony, Version=2.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Lib.Harmony.2.0.4\lib\net472\0Harmony.dll</HintPath>
+      <Private>True</Private>
+      <DestinationSubDirectory>Assemblies/</DestinationSubDirectory>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(SteamFolder)\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>$(SteamFolder)\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ContentAbout Include="content/About/**/*" />
+    <ContentDefs Include="content/Defs/**/*" />
+    <ContentLanguages Include="content/Languages/**/*" />
+    <ContentPatches Include="content/Patches/**/*" />
+    <ContentSounds Include="content/Sounds/**/*" />
+    <ContentTextures Include="content/Textures/**/*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="src/**/*.cs" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ModName>PrioritiesManager</ModName>
+    <SteamFolder Condition="'$(SteamFolder)'==''">$(MsBuildProgramFiles32)\Steam\steamapps</SteamFolder>
+    <ModFolder Condition="'$(ModFolder)'==''">$(SteamFolder)\common\RimWorld\Mods</ModFolder>
+    <ExcludePattern>.gitkeep$|.config$</ExcludePattern>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <Target Name="BeforeBuild">
+    <Message Text="ProgramFiles(x86) == $(MsBuildProgramFiles32)" Importance="High" />
+    <Message Text="SteamFolder == $(SteamFolder)" Importance="High" />
+    <Message Text="ModFolder == $(ModFolder)" Importance="High" />
+    <Message Text="MSBuildToolsPath == $(MSBuildToolsPath)" Importance="High" />
+    <Message Text="Cleaning $(OutputPath)" Importance="High" />
+
+    <RemoveDir Directories="$(OutputPath)" />
+    <MakeDir Directories="$(OutputPath)" Condition="!Exists('$(OutputPath)')" />
+  </Target>
+
+  <Target Name="AfterBuild">
+    <ItemGroup>
+      <ContentAboutFiltered Include="@(ContentAbout)" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Identity)','$(ExcludePattern)'))" />
+      <ContentDefsFiltered Include="@(ContentDefs)" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Identity)','$(ExcludePattern)'))" />
+      <ContentLanguagesFiltered Include="@(ContentLanguages)" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Identity)','$(ExcludePattern)'))" />
+      <ContentPatchesFiltered Include="@(ContentPatches)" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Identity)','$(ExcludePattern)'))" />
+      <ContentSoundsFiltered Include="@(ContentSounds)" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Identity)','$(ExcludePattern)'))" />
+      <ContentTexturesFiltered Include="@(ContentTextures)" Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Identity)','$(ExcludePattern)'))" />
+    </ItemGroup>
+
+    <Message Text="%0AContent Files%0A-------------------" Importance="High" />
+    <Message Text="Moving %(ContentAboutFiltered.Identity) to $(OutputPath)About\%(ContentAboutFiltered.RecursiveDir)%(ContentAboutFiltered.Filename)%(ContentAboutFiltered.Extension)" Importance="High" />
+    <Copy SourceFiles="@(ContentAboutFiltered)" DestinationFiles="@(ContentAboutFiltered -> '$(OutputPath)About\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Message Text="Moving %(ContentDefsFiltered.Identity) to $(OutputPath)Defs\%(ContentDefsFiltered.RecursiveDir)%(ContentDefsFiltered.Filename)%(ContentDefsFiltered.Extension)" Importance="High" />
+    <Copy SourceFiles="@(ContentDefsFiltered)" DestinationFiles="@(ContentDefsFiltered -> '$(OutputPath)Defs\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Message Text="Moving %(ContentLanguagesFiltered.Identity) to $(OutputPath)Languages\%(ContentLanguagesFiltered.RecursiveDir)%(ContentLanguagesFiltered.Filename)%(ContentLanguagesFiltered.Extension)" Importance="High" />
+    <Copy SourceFiles="@(ContentLanguagesFiltered)" DestinationFiles="@(ContentLanguagesFiltered -> '$(OutputPath)Languages\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Message Text="Moving %(ContentPatchesFiltered.Identity) to $(OutputPath)Patches\%(ContentPatchesFiltered.RecursiveDir)%(ContentPatchesFiltered.Filename)%(ContentPatchesFiltered.Extension)" Importance="High" />
+    <Copy SourceFiles="@(ContentPatchesFiltered)" DestinationFiles="@(ContentPatchesFiltered -> '$(OutputPath)Patches\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Message Text="Moving %(ContentSoundsFiltered.Identity) to $(OutputPath)Sounds\%(ContentSoundsFiltered.RecursiveDir)%(ContentSoundsFiltered.Filename)%(ContentSoundsFiltered.Extension)" Importance="High" />
+    <Copy SourceFiles="@(ContentSoundsFiltered)" DestinationFiles="@(ContentSoundsFiltered -> '$(OutputPath)Sounds\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Message Text="Moving %(ContentTexturesFiltered.Identity) to $(OutputPath)Textures\%(ContentTexturesFiltered.RecursiveDir)%(ContentTexturesFiltered.Filename)%(ContentTexturesFiltered.Extension)" Importance="High" />
+    <Copy SourceFiles="@(ContentTexturesFiltered)" DestinationFiles="@(ContentTexturesFiltered -> '$(OutputPath)Textures\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Message Text="%0AAssemblies Files%0A-------------------" Importance="High" />
+    <ItemGroup>
+      <OutputFiles Include="$(OutputPath)*" />
+    </ItemGroup>
+    <Message Text="Moving %(OutputFiles.Identity) to $(OutputPath)Assemblies\%(OutputFiles.Filename)%(OutputFiles.Extension)" Importance="High" />
+    <Move SourceFiles="@(OutputFiles)" DestinationFolder="$(OutputPath)Assemblies\" />
+
+    <Message Text="%0AMod Cleanup%0A-------------------" Importance="High" />
+    <Message Text="Removing $(ModFolder)\$(ModName)" Importance="High" />
+    <RemoveDir Directories="$(ModFolder)\$(ModName)" />
+    <MakeDir Directories="$(ModFolder)\$(ModName)" Condition="!Exists('$(ModFolder)\$(ModName)')" />
+
+    <Message Text="%0AMod Files%0A-------------------" Importance="High" />
+    <ItemGroup>
+      <ModFiles Include="$(OutputPath)**/*" />
+    </ItemGroup>
+
+    <Message Text="Copying %(ModFiles.Identity) to $(ModFolder)\$(ModName)\%(ModFiles.RecursiveDir)%(ModFiles.Filename)%(ModFiles.Extension)" Importance="High" />
+    <Copy SourceFiles="@(ModFiles)" DestinationFiles="@(ModFiles -> '$(ModFolder)\$(ModName)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+</Project>
